@@ -1,5 +1,20 @@
-import { Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { Roles } from 'src/decorators/roles.decorator';
+import { Role } from 'src/roles.enum';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { UpdateProductDto } from './updateProducts.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -9,26 +24,17 @@ export class ProductsController {
     if (page && limit) {
       return this.productsService.getProducts(page, limit);
     }
-    return this.productsService.getProducts(1, 5);
+    return this.productsService.getProducts(1, 10);
   }
   @Post('seeder')
   addProducts() {
     return this.productsService.addProducts();
   }
-  // @Get(':id')
-  // getProduct(@Param('id') id: string) {
-  //   return this.productsService.getProduct(id);
-  // }
-  // @Post()
-  // createProduct(@Body() products: any) {
-  //   return this.productsService.createProduct(products);
-  // }
-  // @Put(':id')
-  // updateProduct(@Param('id') id: string, @Body() user: any) {
-  //   return this.productsService.updateProduct(id, user);
-  // }
-  // @Delete(':id')
-  // deleteProduct(@Param('id') id: string) {
-  //   return this.productsService.deleteProduct(id);
-  // }
+  @ApiBearerAuth()
+  @Put(':id')
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
+  updateProduct(@Param('id') id: string, @Body() updates: UpdateProductDto) {
+    return this.productsService.updateProduct(id, updates);
+  }
 }

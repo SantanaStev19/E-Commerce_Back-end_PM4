@@ -1,26 +1,46 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
-
-function validate(request) {
-  const authHeader = request.headers.authorization;
-
-  if (!authHeader) return false;
-
-  const auth = authHeader.split(' ')[1];
-
-  const [email, password] = auth.split(':');
-
-  if (!email || !password) return false;
-
-  return true;
-}
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  constructor(private JWTService: JwtService) {}
+
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    return validate(request);
+
+    const token = request?.headers?.authorization?.split(' ')[1];
+
+    if (!token) {
+      throw new UnauthorizedException('No autorizado, debes ser administrador');
+    }
+
+    try {
+      const secret = process.env.JWT_SECRET;
+      const user = this.JWTService.verify(token, { secret });
+
+      user.exp = new Date(user.exp * 1000);
+      user.iat = new Date(user.iat * 1000);
+
+      if (user.isAdmin) {
+        user.roles = ['admin'];
+      } else {
+        user.roles = ['user'];
+      }
+
+      request.user = user;
+
+      return true;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      throw new UnauthorizedException('No autorizado');
+    }
   }
 }

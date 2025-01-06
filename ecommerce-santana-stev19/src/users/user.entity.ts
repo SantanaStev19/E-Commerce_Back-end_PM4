@@ -23,8 +23,8 @@ export class User {
   @Column({ type: 'varchar', nullable: false })
   password: string;
 
-  @Column({ type: 'int', nullable: true })
-  phone: number;
+  @Column({ type: 'varchar', nullable: true })
+  phone: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
   country: string;
@@ -35,8 +35,8 @@ export class User {
   @Column({ type: 'varchar', length: 50, nullable: true })
   city: string;
 
-  // @Column({ type: 'boolean', default: false })
-  // isAdmin: boolean;
+  @Column({ type: 'boolean', default: false })
+  isAdmin: boolean;
 
   @OneToMany(() => Orders, (order) => order.user)
   @JoinColumn({ name: 'orders_id' })
