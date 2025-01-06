@@ -99,6 +99,4 @@ export class updateUserDto extends PickType(CreateUserDto, [
   'address',
   'country',
   'city',
-]) {
-  categoryId: any;
-}
+]) {}

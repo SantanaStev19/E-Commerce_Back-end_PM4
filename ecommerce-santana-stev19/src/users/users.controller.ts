@@ -33,18 +33,27 @@ export class UsersController {
     }
     return this.usersService.getUsers(1, 5);
   }
+  @ApiBearerAuth()
   @Get(':id')
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
   getUser(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.getUser(id);
   }
+  @ApiBearerAuth()
   @Put(':id')
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
   updateUser(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: updateUserDto,
   ) {
     return this.usersService.updateUser(id, updateUserDto);
   }
+  @ApiBearerAuth()
   @Delete(':id')
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
   deleteUser(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.deleteUser(id);
   }
