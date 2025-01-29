@@ -19,6 +19,9 @@ export class Orders {
   @Column()
   date: Date;
 
+  @Column({ default: true })
+  status: boolean;
+
   @OneToOne(() => OrderDetail, (orderDetail) => orderDetail.order)
   orderDetail: OrderDetail;
 

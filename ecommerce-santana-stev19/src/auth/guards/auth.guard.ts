@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
+import { Role } from 'src/roles.enum';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -16,30 +17,34 @@ export class AuthGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    const token = request?.headers?.authorization?.split(' ')[1];
+    const authHeader = request.headers.authorization;
 
-    if (!token) {
+    if (!authHeader)
       throw new UnauthorizedException('No autorizado, debes ser administrador');
-    }
+
+    const token = authHeader.split(' ')[1];
+
+    if (!token) throw new UnauthorizedException('No autorizado');
 
     try {
       const secret = process.env.JWT_SECRET;
-      const user = this.JWTService.verify(token, { secret });
 
-      user.exp = new Date(user.exp * 1000);
-      user.iat = new Date(user.iat * 1000);
+      const payload = this.JWTService.verify(token, { secret });
 
-      if (user.isAdmin) {
-        user.roles = ['admin'];
+      payload.iat = new Date(payload.iat * 1000);
+      payload.exp = new Date(payload.exp * 1000);
+
+      request.user = payload;
+
+      if (payload.isAdmin) {
+        request.user.roles = [Role.Admin];
       } else {
-        user.roles = ['user'];
+        request.user.roles = [Role.User];
       }
-
-      request.user = user;
 
       return true;
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch (err) {
       throw new UnauthorizedException('No autorizado');
     }
   }

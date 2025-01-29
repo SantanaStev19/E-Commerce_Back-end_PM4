@@ -74,12 +74,13 @@ export class UsersService {
     }
   }
 
-  async deleteUser(id: string): Promise<void> {
+  async deleteUser(id: string): Promise<{ message: string }> {
     try {
       const result = await this.userRepository.delete(id);
       if (result.affected === 0) {
         throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
       }
+      return { message: `Usuario con ID ${id} eliminado con exito` };
     } catch (error) {
       throw new InternalServerErrorException(
         'Error al eliminar el usuario',

@@ -8,6 +8,7 @@ export class AuthController {
 
   @Post('/signup')
   signUp(@Body() user: CreateUserDto) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { passwordConfirmation, ...newUser } = user;
     return this.authService.signUp(newUser);
   }
